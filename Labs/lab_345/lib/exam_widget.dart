@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:lab345/exam_details_screen.dart';
 
 class ExamWidget extends StatelessWidget {
   final String subject;
   final String date;
   final String time;
+  final double latitude;
+  final double longitude;
 
   const ExamWidget({
     super.key, 
     required this.subject,
     required this.date,
     required this.time,
+    required this.latitude,
+    required this.longitude,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ExamDetailsScreen(
+                  latitude: this.latitude,
+                  longitude: this.longitude,
+                ),
+              ),
+            );
+          }, child: Container(
       margin: const EdgeInsets.all(10.0),
       padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
@@ -59,6 +75,6 @@ class ExamWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

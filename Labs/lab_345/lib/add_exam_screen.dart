@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lab345/notification_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AddExamPage extends StatefulWidget {
   const AddExamPage({Key? key}) : super(key: key);
@@ -15,6 +16,24 @@ class _AddExamPageState extends State<AddExamPage> {
   final TextEditingController nameController = TextEditingController();
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+
+  double? currentLatitude;
+  double? currentLongitude;
+
+  Future<void> _getLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        currentLatitude = position.latitude;
+        currentLongitude = position.longitude;
+      });
+    } catch (e) {
+      print('An error occurred: $e');
+    }
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -105,6 +124,7 @@ class _AddExamPageState extends State<AddExamPage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
+                await _getLocation();
                 final String name = nameController.text.trim();
                 String date = dateController.text.trim();
                 String time = timeController.text.trim();
@@ -117,6 +137,8 @@ class _AddExamPageState extends State<AddExamPage> {
                       'name': name,
                       'date': date,
                       'time': time,
+                      'latitude': currentLatitude,
+                      'longitude': currentLongitude
                     });
 
                     date = date.replaceAllMapped(

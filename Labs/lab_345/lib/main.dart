@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:lab345/add_exam_screen.dart';
 import 'package:lab345/calendar_widget.dart';
 import 'package:lab345/exam_list.dart';
+import 'package:lab345/map_screen.dart';
 import 'package:lab345/signin.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
@@ -82,14 +83,29 @@ class ExamHomePage extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context, AuthService authServiceProvider) {
     return AppBar(
-      title: Text('FINKI app'),
+      title: const Text('FINKI app'),
       actions: [
         _buildAddExamButton(context),
         _buildLogoutButton(authServiceProvider),
+        _buildMapButton(context)
       ],
     );
   }
 
+  IconButton _buildMapButton(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.map),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MapScreen(),
+          ),
+        );
+      },
+    );
+  }
+  
   IconButton _buildAddExamButton(BuildContext context) {
     return IconButton(
       icon: Icon(Icons.add),

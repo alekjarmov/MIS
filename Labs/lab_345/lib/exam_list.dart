@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lab345/exam_card.dart';
+import 'package:lab345/exam_widget.dart';
 
 class ExamPage extends StatelessWidget {
   final User? authenticatedUser = FirebaseAuth.instance.currentUser;
@@ -81,6 +81,8 @@ class ExamPage extends StatelessWidget {
           subject: examData['name'],
           date: examData['date'],
           time: examData['time'],
+          latitude: examData['latitude'],
+          longitude: examData['longitude'],
         );
       }).toList(),
     );
