@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:lab345/notification_service.dart';
 
 class AddExamPage extends StatefulWidget {
   const AddExamPage({Key? key}) : super(key: key);
@@ -46,6 +48,18 @@ class _AddExamPageState extends State<AddExamPage> {
 
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
+  
+  int calculateSecondsDifference(String date, String time) {
+    String dateTimeString = "$date $time";
+
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(dateTimeString);
+
+    Duration difference = dateTime.difference(DateTime.now());
+
+    int secondsDifference = difference.inSeconds;
+
+    return secondsDifference;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +77,7 @@ class _AddExamPageState extends State<AddExamPage> {
           children: [
             TextField(
               controller: nameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Exam Name',
                 border: OutlineInputBorder(),
               ),
@@ -71,7 +85,7 @@ class _AddExamPageState extends State<AddExamPage> {
             const SizedBox(height: 16.0),
             TextField(
               controller: dateController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Date (YYYY-MM-DD)',
                 border: OutlineInputBorder(),
               ),
@@ -81,7 +95,7 @@ class _AddExamPageState extends State<AddExamPage> {
             const SizedBox(height: 16.0),
             TextField(
               controller: timeController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Time',
                 border: OutlineInputBorder(),
               ),
@@ -92,8 +106,8 @@ class _AddExamPageState extends State<AddExamPage> {
             ElevatedButton(
               onPressed: () async {
                 final String name = nameController.text.trim();
-                final String date = dateController.text.trim();
-                final String time = timeController.text.trim();
+                String date = dateController.text.trim();
+                String time = timeController.text.trim();
                 if (name.isNotEmpty && date.isNotEmpty && time.isNotEmpty && user != null && user.uid.isNotEmpty) {
                   try {
                     final String userUid = user.uid;
@@ -104,6 +118,31 @@ class _AddExamPageState extends State<AddExamPage> {
                       'date': date,
                       'time': time,
                     });
+
+                    date = date.replaceAllMapped(
+                      RegExp(r'(\d+)-(\d+)-(\d+)'),
+                      (match) => '${match[1]!.padLeft(2, '0')}-${match[2]!.padLeft(2, '0')}-${match[3]!.padLeft(2, '0')}',
+                    );
+
+                    time = time.replaceAllMapped(
+                      RegExp(r'(\d+):(\d+)\s+(AM|PM)'),
+                      (match) {
+                        int hour = int.parse(match[1]!);
+                        int minute = int.parse(match[2]!);
+                        String period = match[3]!;
+                        if (period == 'PM' && hour != 12) {
+                          hour += 12;
+                        } else if (period == 'AM' && hour == 12) {
+                          hour = 0;
+                        }
+                        return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}:00';
+                      },
+                    );
+                    
+                    int secondsDifference = calculateSecondsDifference(date, time);
+
+                    await NotificationService().scheduleNotification("Exam $name happening now.", 
+                      secondsDifference);
 
                     Navigator.pop(context);
                   } catch (e) {
